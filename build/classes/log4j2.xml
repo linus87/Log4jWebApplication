@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG"
+	packages="org.apache.logging.log4j.core.lookup">
+	<Properties>
+		<Property name="filename">var/log/Log4jWebApplication.log</Property>
+		<Property name="rollingfilename">var/log/Log4jWebApplication.log</Property>
+	</Properties>
+	
+	<BurstFilter level="DEBUG" rate="10" maxBurst="100" onMatch="ACCEPT" onMismatch="DENY" />
+	
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+		</Console>
+		
+		<RollingFile name="RollingFile" fileName="${rollingfilename}"
+			filePattern="var/log/Log4jWebApplication-${date:MM}.%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d %p %c{1.} [%t] $${sys:os.name} %m%n</Pattern>
+			</PatternLayout>
+			<!-- default size is 10MB -->
+			<SizeBasedTriggeringPolicy />
+		</RollingFile>
+		
+		<File name="File" fileName="${filename}">
+			<PatternLayout>
+				<Pattern>%d %p %c{1.} [%t] $${sys:os.name} %m%n</Pattern>
+			</PatternLayout>
+		</File>
+		
+		<JDBC name="databaseAppender" tableName="application_log">
+			<DriverManager url="jdbc:mysql://localhost:3306/log4jwebapplication" username="linus" password="Ux9ae4mGKafa9hjX" />
+			<Column name="eventDate" isEventTimestamp="true" />
+			<Column name="level" pattern="%level" isUnicode="true" />
+			<Column name="logger" pattern="%logger" isUnicode="true" />
+			<Column name="message" pattern="%message" isUnicode="true" />
+			<Column name="exception" pattern="%ex{full}" isUnicode="true" />
+		</JDBC>
+		<!-- <Routing name="Routing"> <Routes pattern="$${date:MM}"> <Route> <RollingFile 
+			name="Rolling-${sd:type}" fileName="${rollingfilename}" filePattern = "var/log/test1-${date:MM}.%i.log.gz"> 
+			<PatternLayout> <Pattern>%d %p %c{1.} [%t] $${sys:os.name} %m%n</Pattern> 
+			</PatternLayout> <SizeBasedTriggeringPolicy size="500" /> </RollingFile> 
+			</Route> </Routes> </Routing> -->
+	</Appenders>
+	
+	<Loggers>
+		<Root level="DEBUG">
+			<AppenderRef ref="Console" />
+		</Root>
+		<Logger name="com.linus" level="DEBUG" additivity="false">
+			<AppenderRef ref="databaseAppender" />
+		</Logger>
+		<Logger name="com" level="DEBUG" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+	</Loggers>
+</Configuration>
